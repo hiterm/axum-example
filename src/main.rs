@@ -1,5 +1,5 @@
-use axum::{Router, routing::get};
-use std::net::SocketAddr;
+use axum::{routing::get, Router};
+use std::{env, net::SocketAddr};
 
 #[tokio::main]
 async fn main() {
@@ -13,7 +13,11 @@ async fn main() {
 
     // run our app with hyper
     // `axum::Server` is a re-export of `hyper::Server`
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let port: u16 = env::var("PORT")
+        .expect("env var PORT is not set.")
+        .parse()
+        .expect("Cannot parse PORT");
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::debug!("listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
@@ -22,5 +26,6 @@ async fn main() {
 }
 
 async fn root() -> &'static str {
+    tracing::debug!("root accessed.");
     "Hello, World!"
 }
